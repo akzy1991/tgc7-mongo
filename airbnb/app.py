@@ -12,9 +12,24 @@ DB_NAME = "sample_airbnb"
 
 client = pymongo.MongoClient(MONGO_URI)
 
-all_movies = client[DB_NAME].listingsAndReviews.find().limit(10)
-for m in all_movies:
-    print(m)
+
+@app.route('/')
+def show_listings():
+    # get the current page number
+    page_number = request.args.get('page')
+    # if there is no page number (aka, None) then assume we are at page 0
+    if page_number == None:
+        page_number = 0
+    else:
+        page_number = int(page_number)
+
+    print("page number=", page_number)
+    all_listings = client[DB_NAME].listingsAndReviews.find().skip(
+        page_number*20).limit(20)
+    return render_template('show_listings.template.html',
+                           all_listings=all_listings,
+                           page_number=page_number)
+
 
 # "magic code" -- boilerplate
 if __name__ == '__main__':
